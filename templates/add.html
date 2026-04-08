@@ -1,0 +1,18 @@
+{% extends "base.html" %} {% block content %}
+<h2>Add a New Goal</h2>
+<form method="post">
+  <label for="name">Goal Name:</label><br />
+  <input type="text" id="name" name="name" required /><br /><br />
+
+  <label for="category">Category:</label><br />
+  <select id="category" name="category" required>
+    <option value="Fitness">Fitness</option>
+    <option value="Career">Career</option>
+    <option value="Learning">Learning</option>
+    <option value="Finance">Finance</option>
+    <option value="Personal">Personal</option></select
+  ><br /><br />
+
+  <input type="submit" value="Add Goal" />
+</form>
+{% endblock %}
