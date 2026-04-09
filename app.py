@@ -1,34 +1,54 @@
-from flask import Flask,render_template,request,redirect,url_for
+from flask import Flask,render_template,request,redirect,url_for,flash
+from flask_sqlalchemy import SQLAlchemy
 app = Flask(__name__)
-goals = []
+app.config['SQLALCHEMY_DATABASE_URI']= 'sqlite:///goals.db'
+db=SQLAlchemy(app)
+app.secret_key = 'your secret_key'
+
+class Goal(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    category = db.Column(db.String(100), nullable=False)
+
+with app.app_context():
+    db.create_all()
+
 
 @app.route('/')
 def home():
-    return render_template('home.html', goals=goals)
+    all_goals = Goal.query.all()
+    return render_template('home.html', goals=all_goals)
 
 @app.route('/add_goal', methods=['GET', 'POST'])
 def add_goal():
     if request.method == 'POST':
-        name = request.form['name']
-        category = request.form['category']
-        goals.append({'name': name, 'category': category})
+        new_goal= Goal(name=request.form['name'], category=request.form['category'])
+        db.session.add(new_goal)
+        db.session.commit()
+        flash('Goal added successfully!', 'success')
         return redirect(url_for('home'))
     return render_template('add.html')
 
-@app.route('/delete/<int:index>')
-def delete(index):
-    goals.pop(index)
+@app.route('/delete/<int:id>')
+def delete_goal(id):
+    goal = Goal.query.get_or_404(id)
+    db.session.delete(goal)
+    db.session.commit()
+    flash('Goal deleted successfully!', 'danger')
     return redirect(url_for('home'))
    
 
 
-@app.route('/edit/<int:index>', methods=['GET', 'POST'])
-def edit(index):
+@app.route('/edit/<int:id>', methods=['GET', 'POST'])
+def edit_goal(id):
+    goal = Goal.query.get_or_404(id)
     if request.method == 'POST':
-        goals[index]['name'] = request.form['name']
-        goals[index]['category'] = request.form['category']
+        goal.name = request.form['name']
+        goal.category = request.form['category']
+        db.session.commit()
+        flash('Goal updated successfully!', 'info')
         return redirect(url_for('home'))
-    return render_template('edit.html', goal=goals[index])
+    return render_template('edit.html', goal=goal)
 
 if __name__ == '__main__':
     app.run(debug=True)
