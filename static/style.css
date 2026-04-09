@@ -119,3 +119,9 @@ button:hover {
   color: #2a4365;
   border-left: 4px solid #4299e1;
 }
+.goal.completed {
+  background-color: #c6f6d5;
+  border-left-color: #48bb78;
+  text-decoration: line-through;
+  color: #276749;
+}

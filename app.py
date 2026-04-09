@@ -1,7 +1,7 @@
 from flask import Flask,render_template,request,redirect,url_for,flash
 from flask_sqlalchemy import SQLAlchemy
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI']= 'sqlite:///goals.db'
+app.config['SQLALCHEMY_DATABASE_URI']= 'sqlite:///goals_new.db'
 db=SQLAlchemy(app)
 app.secret_key = 'your secret_key'
 
@@ -9,6 +9,7 @@ class Goal(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     category = db.Column(db.String(100), nullable=False)
+    completed = db.Column(db.Boolean, nullable=False, default=False)
 
 with app.app_context():
     db.create_all()
@@ -49,6 +50,15 @@ def edit_goal(id):
         flash('Goal updated successfully!', 'info')
         return redirect(url_for('home'))
     return render_template('edit.html', goal=goal)
+
+
+@app.route('/toggle/<int:id>')
+def toggle_complete(id):
+    goal = Goal.query.get_or_404(id)
+    goal.completed = not goal.completed 
+    db.session.commit()
+    flash('Goal status updated!', 'info')
+    return redirect(url_for('home'))
 
 if __name__ == '__main__':
     app.run(debug=True)
